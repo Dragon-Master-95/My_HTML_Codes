@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Star Wars-style Crawl (Transparent)</title>
+<style>
+  /* Reset-ish */
+  html,body {
+    height: 100%;
+    margin: 0;
+    background: transparent; /* IMPORTANT: keep page transparent */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Container sets perspective so text appears to vanish into the distance */
+  .star-wars {
+    position: relative;
+    width: 100%;
+    height: 100vh;              /* fills viewport height */
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;      /* start crawl from bottom */
+    justify-content: center;
+    perspective: 800px;         /* depth effect */
+    -webkit-perspective: 800px;
+  }
+
+  /* Optional subtle star field (kept very subtle because background is transparent) */
+  .star-wars::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(0.8px 0.8px at 10% 20%, rgba(255,255,255,0.1), transparent),
+      radial-gradient(0.9px 0.9px at 70% 40%, rgba(255,255,255,0.1), transparent),
+      radial-gradient(0.7px 0.7px at 40% 80%, rgba(255,255,255,0.1), transparent);
+    opacity: 0.1; /* really faint — won't overpower underlying background */
+    pointer-events: none;
+  }
+
+  /* The crawl box is tilted away from the viewer (rotateX) and moved into 3D */
+  .crawl {
+    position: relative;
+    width: min(75ch, 70%);      /* restrict line-length for readability */
+    transform-origin: 50% 100%;
+    transform: rotateX(30deg) translateZ(0);
+    -webkit-transform: rotateX(30deg) translateZ(0);
+    color: #ffefb5;             /* warm yellowish crawl color */
+    font-family: "Arial Black", "Impact", "Franklin Gothic Medium", sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    text-align: justify;
+    text-justify: inter-word;
+    letter-spacing: 0.03em;
+    /* blending so if placed over dark/light backgrounds it remains visible */
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6), 0 2px 10px rgba(0,0,0,0.6);
+  }
+
+  /* The moving block that contains the paragraphs */
+  .crawl .content {
+    transform-origin: 50% 100%;
+    /* we animate translateY from 100% (below) to -350% (far above) */
+    animation: crawlUp 32s linear infinite;
+    -webkit-animation: crawlUp 32s linear infinite;
+  }
+
+  /* paragraph spacing similar to credits */
+  .crawl p {
+    margin: 0 0 1.2em 0;
+  }
+
+  /* Fade gradients at top and bottom so text appears/disappears smoothly.
+     Uses pointer-events:none so it doesn't block clicks. */
+  .fade-top, .fade-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 18%;
+    pointer-events: none;
+  }
+  .fade-bottom {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0));
+    mix-blend-mode: multiply;
+  }
+  .fade-top {
+    top: 6%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0));
+    mix-blend-mode: multiply;
+  }
+
+  /* Keyframes: move content upward and slightly scale to mimic distance */
+  @keyframes crawlUp {
+    0% {
+      transform: translateY(100vh) translateZ(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-350vh) translateZ(-300px) scale(0.6);
+      opacity: 0.9;
+    }
+  }
+
+  /* Respect prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .crawl .content {
+      animation: none;
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  /* Make text scale a bit on very narrow screens */
+  @media (max-width:600px) {
+    .crawl { font-size: 15px; width: 90%; }
+    @keyframes crawlUp { 
+      0% { transform: translateY(100vh) scale(1); }
+      100% { transform: translateY(-350vh) scale(0.55); }
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="star-wars" role="region" aria-label="Star Wars style crawl">
+    <div class="crawl" aria-hidden="false">
+      <div class="content" id="crawlText">
+        <p>Development of advanced methods and algorithms for passive radio frequency source localization</p>
+        <p>Design and prototyping of antennas and RF instrumentation for low-frequency radio astronomy</p>
+        <p>Multi-instrument analysis of the interplanetary medium and space weather using interplanetary scintillation and satellite in-situ data</p>
+        <p>Technology development in space and RF systems, including UAV-based antenna characterization and communication protocols</p>
+        <p>Sensor fusion techniques integrating data from various sensors and platforms to enhance observational accuracy and system performance</p>
+        <p>System design and integration for practical RF and space technology solutions bridging research with real-world application</p>
+      </div>
+    </div>
+
+    <!-- Optional subtle top/bottom fade — because background is transparent, these are gentle -->
+    <div class="fade-top" aria-hidden="true"></div>
+    <div class="fade-bottom" aria-hidden="true"></div>
+  </div>
+
+  <!-- Optional small script: pause on click / restart for user control -->
+  <script>
+    (function(){
+      const content = document.querySelector('.crawl .content');
+      let running = true;
+
+      // Toggle animation on click or tap
+      document.querySelector('.star-wars').addEventListener('click', () => {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        running = !running;
+        content.style.animationPlayState = running ? 'running' : 'paused';
+      });
+
+      // If you want to change speed programmatically, modify animationDuration:
+      // content.style.animationDuration = '45s';
+    })();
+  </script>
+</body>
+</html>
